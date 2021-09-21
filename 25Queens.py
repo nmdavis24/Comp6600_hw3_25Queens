@@ -33,7 +33,7 @@ def Queens():
     currentColumn = 1
     # initial 25 columns from left to right
     for i in range(1, 25):
-        tempBoard = copy.deepcopy(BestNeighbor(board, 0, i))
+        tempBoard = copy.deepcopy(BestNeighbor(board))
         if (tempBoard != [[]]):
             conflicts = GetConflicts(tempBoard)
             print("Step " + str(currentColumn) + " (" + str(conflicts) + "):\n" + "\n".join(' '.join(str(x) for x in row) for row in tempBoard))#str(tempBoard))
@@ -47,11 +47,14 @@ def Queens():
             for i in range(25):
                 for j in range(25):
                     if board[j][i] == "q":
-                        tempBoard = copy.deepcopy(BestNeighbor(board, j, i))
+                        tempBoard = copy.deepcopy(BestNeighbor(board))
                         if (tempBoard != [[]]):
-                            conflicts = GetConflicts(tempBoard)
+                            conflicts = GetConflicts(tempBoard)                            
                             print("Step " + str(currentColumn) + " (" + str(conflicts) + "):\n" + "\n".join(' '.join(str(x) for x in row) for row in tempBoard))#str(tempBoard))
-                            board = copy.deepcopy(tempBoard)                                   
+                            board = copy.deepcopy(tempBoard)
+                            if (conflicts == 0):
+                                print("Nice!")
+                                return                                   
                         else:
                             print("Step " + str(currentColumn) + ": Failed")
          
@@ -91,13 +94,16 @@ def GetConflicts(newBoard):
                     
     return confs
 
-def BestNeighbor(board, row, column):
+def BestNeighbor(board):
     newBoard = [[]]
-    randomNeighbor = [column]
-    for i in range(5):
-        randomNeighbor.append(random.randint(0, 24))
+    randomNeighbor = []
+    while len(randomNeighbor) < 6:
+        num = random.randint(0, 24)
+        if num not in randomNeighbor:
+            randomNeighbor.append(num)
     bestNeighbor = 500
     colQueenRow = []
+    
     betterFound = False
     temp = copy.deepcopy(board)
     for j in randomNeighbor:  
@@ -105,12 +111,13 @@ def BestNeighbor(board, row, column):
             if temp[i][j] == "q":
                 colQueenRow.append(i)                                
      
-    for j in range(5):
-        temp = copy.deepcopy(board)        
+    for j in range(5):              
         for k in range(25):
-            temp[colQueenRow[j]][randomNeighbor[j]] = "w" 
-            if (k != colQueenRow):
-                temp[k][j] = "q"
+            for h in range(25):
+                temp[h][randomNeighbor[j]] = "w"
+            #temp[colQueenRow[j]][randomNeighbor[j]] = "w" 
+            if (k != colQueenRow[j]):
+                temp[k][randomNeighbor[j]] = "q"
                 newConfs = GetConflicts(temp)
                 oldConfs = GetConflicts(board)
                 if  newConfs < oldConfs and newConfs < bestNeighbor:
@@ -120,9 +127,7 @@ def BestNeighbor(board, row, column):
                 elif newConfs == oldConfs or newConfs < bestNeighbor:
                     if (betterFound is False):
                         newBoard = copy.deepcopy(temp)
-                temp[k][j] = "w"
-                             
-            temp[colQueenRow[j]][randomNeighbor[j]] = "q" 
+            temp = copy.deepcopy(board)
             
     if (betterFound):
         return newBoard
@@ -131,8 +136,10 @@ def BestNeighbor(board, row, column):
         # 50% pick random
         if (beepboop == 0):
             boopbeep = random.randint(0, 24)
-            newCol = random.randint(0, 5)       
-            temp[boopbeep][newCol] = "q"
+            newCol = random.randint(0, 5)
+            for h in range(25):
+                temp[h][randomNeighbor[newCol]] = "w"      
+            temp[boopbeep][randomNeighbor[newCol]] = "q"
             return copy.deepcopy(temp)
         # 50% pick least bad 
         else:
